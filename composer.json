@@ -1,7 +1,7 @@
 {
     "name": "alejandrozepeda/bones",
     "description": "Bones, skeleton PHP application",
-    "keywords": ["Bones", "Skeleton", "PHP", "Application", "Boilerplate"],
+    "keywords": ["bones", "skeleton", "php", "application"],
     "type": "project",
     "license": "unlicense",
     "homepage": "https://alejandrozepeda.mx/bones",
