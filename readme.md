@@ -13,4 +13,4 @@ $ cd project
 $ php -S localhost:8000 -t public/ server.php
 ```
 
-For more information, see the [documentation.](https://github.com/alejandrozepeda/bones/wiki)
+For more information see the [documentation.](https://github.com/alejandrozepeda/bones/wiki)
