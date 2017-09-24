@@ -2,7 +2,7 @@
 
 Bones, skeleton PHP application.
 
-## Installation
+## Installation
 
 * PHP 7+
 * Composer
