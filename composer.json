@@ -3,7 +3,8 @@
     "description": "Bones, skeleton PHP application",
     "keywords": ["Bones", "Skeleton", "PHP", "Application", "Boilerplate"],
     "type": "project",
-    "homepage": "https://github.com/alejandrozepeda/Bones",
+    "license": "unlicense",
+    "homepage": "https://alejandrozepeda/bones",
     "authors": [
         {
             "name": "Alejandro Zepeda",
