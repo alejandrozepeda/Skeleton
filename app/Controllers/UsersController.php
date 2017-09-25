@@ -2,13 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Models\Users;
+
 class UsersController
 {
     public function index()
     {
-        $users = database()->select('users', [
-            'id', 'name', 'email'
-        ]);
+        $users = Users::all();
 
         return view('users.index', compact('users'));
     }
