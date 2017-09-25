@@ -4,12 +4,12 @@ namespace App\Controllers;
 
 class WelcomeController
 {
-    public static function index()
+    public function index()
     {
         return view('welcome.index');
     }
 
-    public static function home()
+    public function home()
     {
         return view('welcome.home');
     }

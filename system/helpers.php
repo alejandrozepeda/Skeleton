@@ -34,3 +34,8 @@ function view($view, $data = [])
 {
     \System\Core\Response::view($view, $data);
 }
+
+function database()
+{
+    return \System\Core\App::database();
+}

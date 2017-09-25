@@ -8,17 +8,6 @@ class Config
 {
     private static $config;
 
-    public static function __callStatic($key, $value)
-    {
-        $value = array_shift($value);
-
-        if (!array_key_exists($value, self::$config[$key])) {
-            throw new Exception("No {$key}['{$value}'] is bound in the container.");
-        }
-
-        return self::$config[$key][$value];
-    }
-
     public static function load($file)
     {
         if (!file_exists($file)) {
@@ -26,5 +15,25 @@ class Config
         }
 
         self::$config = parse_ini_file($file, true, INI_SCANNER_TYPED);
+    }
+
+    private static function exists($key, $arr)
+    {
+        if (!array_key_exists($key, $arr)) {
+            throw new Exception("No {$key} is bound in the container.");
+        }
+
+        return $arr[$key];
+    }
+
+    public static function __callStatic($key, $value)
+    {
+        if(!empty($value)) {
+            $value = array_shift($value);
+
+            return self::exists($value, self::$config[$key]);
+        }
+
+        return self::exists($key, self::$config);
     }
 }

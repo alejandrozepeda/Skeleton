@@ -9,19 +9,6 @@ class Router
     private static $routes;
     private static $regex;
 
-    public static function __callStatic($method, $args)
-    {
-        $uri = trim($args[0], '/') . '/';
-
-        self::$routes[] = [
-            'uri' => $uri,
-            'action' => $args[1],
-            'method' => strtoupper($method)
-        ];
-
-        self::$regex[] = "#^{$uri}\$#";
-    }
-
     public static function run($uri, $method)
     {
         foreach (self::$regex as $key => $value) {
@@ -46,5 +33,18 @@ class Router
         array_shift($args);
 
         return call_user_func_array([new $controller, $action], $args);
+    }
+
+    public static function __callStatic($method, $args)
+    {
+        $uri = trim($args[0], '/') . '/';
+
+        self::$routes[] = [
+            'uri' => $uri,
+            'action' => $args[1],
+            'method' => strtoupper($method)
+        ];
+
+        self::$regex[] = "#^{$uri}\$#";
     }
 }
