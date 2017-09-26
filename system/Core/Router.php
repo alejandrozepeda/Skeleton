@@ -32,7 +32,9 @@ class Router
 
         array_shift($args);
 
-        return call_user_func_array([new $controller, $action], $args);
+        return call_user_func_array([
+            new $controller, $action
+        ], $args);
     }
 
     public static function __callStatic($method, $args)

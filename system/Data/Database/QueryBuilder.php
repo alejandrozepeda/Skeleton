@@ -13,100 +13,112 @@ class QueryBuilder
         $this->pdo = $pdo;
     }
 
+    public function raw($sql, $data = [])
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->bind($stmt, $data);
+        $stmt->execute();
+
+        if (preg_match('/insert/i', $sql)) {
+            return $this->pdo->lastInsertId();
+        } elseif (preg_match('/select/i', $sql)) {
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $stmt->rowCount();
+    }
+
     public function select($table, $fields, $conditions = [])
     {
-        $sql = sprintf('SELECT %s FROM %s', implode(', ', $fields), $table);
+        $sql = sprintf('SELECT %s FROM %s',
+            implode(', ', $fields), $table
+        );
+
         if (!empty($conditions)) {
-            $sql .= sprintf(' WHERE %s', $this->where($conditions));
+            $sql .= sprintf(' WHERE %s',
+                $this->where($conditions)
+            );
         }
 
         $stmt = $this->pdo->prepare($sql);
-        $this->bind($stmt, $conditions)->execute();
+        $stmt = $this->bind($stmt, $conditions);
+        $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function insert($table, $data)
     {
-        ksort($data);
-        $names = implode(', ', array_keys($data));
-        $values = ':data_' . implode(', :data_', array_keys($data));
-        $statement = $this->pdo->prepare("INSERT INTO {$table} ({$names}) VALUES ({$values})");
-        $statement = $this->binds($statement, $data);
-        $statement->execute();
+        $sql = sprintf('INSERT INTO %s (%s) VALUES (%s)',
+            $table, implode(', ', array_keys($data)),
+            ':' . implode(', :', array_keys($data))
+        );
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->bind($stmt, $data);
+        $stmt->execute();
+
         return $this->pdo->lastInsertId();
     }
 
-    public function update($table, $data, $where)
+    public function update($table, $data, $conditions)
     {
-        ksort($data);
-        ksort($where);
-        $dataDetails = $this->details($data, ',');
-        $whereDetails = $this->details($where, 'AND', 'where');
-        $statement = $this->pdo->prepare("UPDATE {$table} SET {$dataDetails} WHERE {$whereDetails}");
-        $statement = $this->binds($statement, $data);
-        $statement = $this->binds($statement, $where, 'where');
-        $statement->execute();
-        return $statement->rowCount();
+        $sql = sprintf('UPDATE %s SET %s WHERE %s', $table,
+            $this->where($data, ', '),
+            $this->where($conditions)
+        );
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->bind($stmt, $data);
+        $stmt = $this->bind($stmt, $conditions);
+        $stmt->execute();
+
+        return $stmt->rowCount();
     }
 
-    public function delete($table, $where)
+    public function delete($table, $conditions)
     {
-        ksort($where);
-        $whereDetails = $this->details($where);
-        $statement = $this->pdo->prepare("DELETE FROM {$table} WHERE {$whereDetails}");
-        $statement = $this->binds($statement, $where);
-        $statement->execute();
-        return $statement->rowCount();
+        $sql = sprintf('DELETE FROM %s WHERE %s',
+            $table, $this->where($conditions)
+        );
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->bind($stmt, $conditions);
+        $stmt->execute();
+
+        return $stmt->rowCount();
     }
 
-    public function raw($sql, $params = array())
+    private function bind($stmt, $params)
     {
-        $statement = $this->pdo->prepare($sql);
-        $statement->execute($params);
-        if (preg_match('/insert/i', $sql)) {
-            return $this->pdo->lastInsertId();
-        } elseif (preg_match('/update/i', $sql)) {
-            return $statement->rowCount();
-        } elseif (preg_match('/delete/i', $sql)) {
-            return $statement->rowCount();
-        } elseif (preg_match('/select/i', $sql)) {
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
-        } else {
-            return $statement->rowCount();
-        }
-    }
+        foreach ($params as $key => $value) {
+            $type = false;
 
-    private function where($conditions)
-    {
-        $sql = '';
-        foreach (array_values($conditions) as $value) {
-            $sql .= " AND {$value[0]} {$value[1]} :{$value[0]}";
-        }
-
-        return ltrim($sql, " AND ");
-    }
-
-    private function bind($stmt, $conditions)
-    {
-        foreach (array_values($conditions) as $value) {
-            $param = false;
-
-            if (is_int($value[2])) {
-                $param = PDO::PARAM_INT;
-            } elseif (is_string($value[2])) {
-                $param = PDO::PARAM_STR;
-            } elseif (is_bool($value[2])) {
-                $param = PDO::PARAM_BOOL;
-            } elseif (is_null($value[2])) {
-                $param = PDO::PARAM_NULL;
+            if (is_int($value)) {
+                $type = PDO::PARAM_INT;
+            } elseif (is_string($value)) {
+                $type = PDO::PARAM_STR;
+            } elseif (is_bool($value)) {
+                $type = PDO::PARAM_BOOL;
+            } elseif (is_null($value)) {
+                $type = PDO::PARAM_NULL;
             }
 
-            if ($param) {
-                $stmt->bindValue(":{$value[0]}", $value[2], $param);
+            if ($type) {
+                $stmt->bindValue(":{$key}", $value, $type);
             }
         }
 
         return $stmt;
+    }
+
+    private function where($conditions, $logic = 'AND')
+    {
+        $sql = '';
+        foreach (array_keys($conditions) as $key) {
+            $sql .= " {$logic} {$key} = :{$key}";
+        }
+
+        return ltrim($sql, " {$logic} ");
     }
 }

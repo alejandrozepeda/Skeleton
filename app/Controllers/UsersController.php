@@ -15,31 +15,43 @@ class UsersController
 
     public function create()
     {
-
+        return view('users.create');
     }
 
     public function store()
     {
+        Users::create($_POST);
 
+        return redirect('users');
     }
 
-    public function show()
+    public function show($id)
     {
+        $user = Users::find($id);
 
+        return view('users.show', compact('user'));
     }
 
-    public function edit()
+    public function edit($id)
     {
+        $user = Users::find($id);
 
+        return view('users.edit', compact('user'));
     }
 
-    public function update()
+    public function update($id)
     {
+        $user = Users::find($id);
+        Users::update($_POST, $user['id']);
 
+        return redirect('users');
     }
 
-    public function destroy()
+    public function destroy($id)
     {
+        $user = Users::find($id);
+        Users::destroy($user['id']);
 
+        return redirect('users');
     }
 }

@@ -17,8 +17,8 @@ class Response
 
     public static function json($data, $code)
     {
-        $encoded = json_encode($data);
         http_response_code($code);
+        $encoded = json_encode($data);
 
         header('Content-Type: application/json');
         header('Content-Length:' . strlen($encoded));
@@ -45,7 +45,7 @@ class Response
         http_response_code($code);
 
         header("Status: {$code}");
-        header("Location: {$url}");
+        header("Location: /{$url}");
 
         exit;
     }
