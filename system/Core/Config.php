@@ -28,7 +28,7 @@ class Config
 
     public static function __callStatic($key, $value)
     {
-        if(!empty($value)) {
+        if (!empty($value)) {
             $value = array_shift($value);
 
             return self::exists($value, self::$config[$key]);

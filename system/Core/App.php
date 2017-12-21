@@ -3,8 +3,13 @@
 namespace System\Core;
 
 use Exception;
-use System\Data\Database\Connection;
-use System\Data\Database\QueryBuilder;
+use System\Data\Auth\Session;
+use System\Data\Cache\{
+    CacheBuilder, Connection as CacheConnection
+};
+use System\Data\Database\{
+    QueryBuilder, Connection
+};
 
 class App
 {
@@ -15,11 +20,22 @@ class App
         self::$app[$key] = $value;
     }
 
-    public static function employ($database = null)
+    public static function employ($database = null, $session = null, $cache = null)
     {
         if (!empty($database)) {
             self::bind('database', new QueryBuilder(
                 Connection::make($database)
+            ));
+        }
+
+        if (!empty($session)) {
+            self::bind('session', new Session($session));
+            session()->init();
+        }
+
+        if (!empty($cache)) {
+            self::bind('cache', new CacheBuilder(
+                CacheConnection::make($cache)
             ));
         }
     }

@@ -12,7 +12,7 @@ class Response
         var_dump($data);
         echo '</pre>';
 
-        exit;
+        exit();
     }
 
     public static function json($data, $code)
@@ -26,20 +26,6 @@ class Response
         exit($encoded);
     }
 
-    public static function error($view = '', $code = 404)
-    {
-        $file = app_path() . 'Views/' . str_replace('.', '/', $view) . '.php';
-
-        if (!file_exists($file)) {
-            throw new Exception("No route defined.");
-        }
-
-        http_response_code($code);
-        require($file);
-
-        exit;
-    }
-
     public static function redirect($url, $code = 302)
     {
         http_response_code($code);
@@ -47,24 +33,26 @@ class Response
         header("Status: {$code}");
         header("Location: /{$url}");
 
-        exit;
+        exit();
     }
 
-    public static function view($view, $data = [], $code = 200)
+    public static function view($layout, $view, $data = [], $code = 200)
     {
-        $file = app_path() . 'Views/' . str_replace('.', '/', $view) . '.php';
+        $layout = views_path() . str_replace('.', '/', $layout) . '.php';
+        $view = views_path() . str_replace('.', '/', $view) . '.php';
 
-        if (!file_exists($file)) {
+        if (!file_exists($layout)) {
+            throw new Exception("No layout {$layout} file found.");
+        }
+
+        if (!file_exists($view)) {
             throw new Exception("No view {$view} file found.");
         }
 
         http_response_code($code);
         extract($data);
+        require($layout);
 
-        require(app_path() . 'Views/partials/header.php');
-        require($file);
-        require(app_path() . 'Views/partials/footer.php');
-
-        exit;
+        exit();
     }
 }

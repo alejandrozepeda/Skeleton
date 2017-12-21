@@ -1,6 +1,4 @@
 config.ini
-/vendor
-
+vendor/
 .DS_Store
-/.idea
-composer.lock
+.idea/
